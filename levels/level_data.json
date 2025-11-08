@@ -1,0 +1,25 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "initial_stones": 10
+    },
+    {
+      "id": 2,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [400, 300],
+          "size": [100, 200]
+        }
+      ]
+    }
+  ]
+}
