@@ -251,13 +251,15 @@ class Renderer:
             highlight_radius = radius // 3
             pygame.draw.circle(self.screen, (200, 200, 200), highlight_pos, highlight_radius)
 
-    def render_ripple(self, ripple: Ripple):
+    def render_ripple(self, ripple: Ripple, obstacles: List = None):
         """
         Render ripple as circular gradient with transparency and shimmer effect.
         Scale based on current radius, alpha based on current amplitude.
+        Uses masking to avoid drawing within obstacle boundaries.
         
         Args:
             ripple: Ripple object to render
+            obstacles: List of obstacles to check for clipping (optional)
         """
         pos = (int(ripple.position.x), int(ripple.position.y))
         
@@ -304,18 +306,53 @@ class Renderer:
             thickness = max(1, int(ring_radius * 0.15))
             pygame.draw.circle(temp_surface, color, center, ring_radius, thickness)
         
+        # If obstacles exist, mask out obstacle areas from the ripple surface
+        if obstacles:
+            # Create an erase mask surface
+            erase_mask = pygame.Surface((size, size), pygame.SRCALPHA)
+            erase_mask.fill((255, 255, 255, 255))  # Start fully opaque (visible)
+            
+            for obstacle in obstacles:
+                # Check if obstacle blocks ripple rendering
+                if not getattr(obstacle, 'blocks_ripple_rendering', True):
+                    continue  # Skip if obstacle doesn't block rendering
+                
+                # Calculate obstacle position relative to temp_surface
+                rel_x = obstacle.position.x - ripple.position.x + center[0]
+                rel_y = obstacle.position.y - ripple.position.y + center[1]
+                
+                # Draw obstacle as transparent (alpha 0) on the mask
+                if isinstance(obstacle.size, (list, tuple)) and len(obstacle.size) == 2:
+                    # Rectangle obstacle
+                    width, height = obstacle.size
+                    rect = pygame.Rect(
+                        int(rel_x - width / 2),
+                        int(rel_y - height / 2),
+                        int(width),
+                        int(height)
+                    )
+                    pygame.draw.rect(erase_mask, (0, 0, 0, 0), rect)
+                elif isinstance(obstacle.size, (int, float)):
+                    # Circle obstacle
+                    pygame.draw.circle(erase_mask, (0, 0, 0, 0), 
+                                     (int(rel_x), int(rel_y)), int(obstacle.size))
+            
+            # Apply the mask using BLEND_RGBA_MULT (multiplies alpha values)
+            temp_surface.blit(erase_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        
         # Blit to screen
         self.screen.blit(temp_surface, (pos[0] - size // 2, pos[1] - size // 2))
     
-    def render_ripples(self, ripples: List[Ripple]):
+    def render_ripples(self, ripples: List[Ripple], obstacles: List = None):
         """
-        Render all active ripples in order.
+        Render all active ripples in order, clipping around obstacles.
         
         Args:
             ripples: List of Ripple objects to render
+            obstacles: List of obstacles to check for clipping (optional)
         """
         for ripple in ripples:
-            self.render_ripple(ripple)
+            self.render_ripple(ripple, obstacles)
 
     def render_stone_counter(self, stones_remaining: int):
         """

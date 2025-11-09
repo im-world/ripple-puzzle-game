@@ -187,8 +187,6 @@ class Game:
         self.ball_physics = None
         self.catapult = None
         self.level_manager = None
-        self.stones_remaining = INITIAL_STONES
-        self.total_stones_used = 0
         
         # Stones in flight
         self.stones_in_flight = []
@@ -269,9 +267,8 @@ class Game:
         # Set obstacles for wave simulator
         self.wave_simulator.set_obstacles(level_data.obstacles)
         
-        # Reset stone counter
-        self.stones_remaining = INITIAL_STONES
-        self.total_stones_used = 0
+        # Reset stone counter to initial value (10 stones for level 1)
+        self.level_manager.reset_stones_for_new_game()
         self.stones_in_flight = []
         
         # Clear particle system
@@ -318,12 +315,11 @@ class Game:
             self.catapult.start_aiming(pygame.mouse.get_pos())
         elif event.type == pygame.MOUSEBUTTONUP:
             stone = self.catapult.stop_aiming()
-            if stone and self.stones_remaining > 0:
+            if stone and self.level_manager.has_stones():
                 # Play launch sound when stone is launched
                 self.audio_manager.play_sound('launch')
                 self.stones_in_flight.append(stone)
-                self.stones_remaining -= 1
-                self.total_stones_used += 1
+                self.level_manager.use_stone()
         elif event.type == pygame.MOUSEMOTION:
             if self.catapult.is_aiming:
                 self.catapult.update_aim(pygame.mouse.get_pos())
@@ -342,7 +338,7 @@ class Game:
                 if self.level_manager.has_next_level():
                     # Define transition callback
                     def transition_to_next_level():
-                        # Transition to next level
+                        # Transition to next level (adds 10 stones automatically)
                         self.level_manager.transition_to_next_level(Ball)
                         self.ball = self.level_manager.ball
                         self.ball_physics = BallPhysics(self.ball, self.wave_simulator)
@@ -426,9 +422,8 @@ class Game:
                     self.ball = self.level_manager.ball
                     self.ball_physics = BallPhysics(self.ball, self.wave_simulator)
                     
-                    # Reset stones
-                    self.stones_remaining = INITIAL_STONES
-                    self.total_stones_used = 0
+                    # Reset stones to 10 for retry (not carrying over from previous level)
+                    self.level_manager.reset_stones_for_new_game()
                     self.stones_in_flight = []
                     
                     # Clear ripples
@@ -561,7 +556,7 @@ class Game:
             self.fade_transition.start_fade_out(0.5, transition_to_complete)
         
         # Check game over condition
-        if self.stones_remaining == 0 and len(self.stones_in_flight) == 0:
+        if not self.level_manager.has_stones() and len(self.stones_in_flight) == 0:
             # Check if ball is at target
             if distance >= level_data.target_radius and not self.game_over_animation.is_animating():
                 # Start game over animation
@@ -653,8 +648,8 @@ class Game:
         for obstacle in level_data.obstacles:
             self.renderer.render_obstacle(obstacle)
         
-        # Render ripples
-        self.renderer.render_ripples(self.wave_simulator.active_ripples)
+        # Render ripples (with obstacle clipping)
+        self.renderer.render_ripples(self.wave_simulator.active_ripples, level_data.obstacles)
         
         # Render fish (in correct layer order - after ripples, before ball)
         self.renderer.render_fish_list(self.fish_list)
@@ -674,7 +669,7 @@ class Game:
         self.renderer.render_catapult(self.catapult)
         
         # Render UI
-        self.renderer.render_stone_counter(self.stones_remaining)
+        self.renderer.render_stone_counter(self.level_manager.get_stones_remaining())
         self.renderer.render_power_meter(self.catapult)
         self.renderer.render_trajectory_preview(self.catapult)
         
@@ -708,13 +703,13 @@ class Game:
         stats_font = pygame.font.SysFont('Arial', 28)
         
         # Stones used this level
-        stones_used_text = f"Stones Used: {self.total_stones_used}"
+        stones_used_text = f"Stones Used: {self.level_manager.get_total_stones_used()}"
         stones_surface = stats_font.render(stones_used_text, True, (100, 100, 100))
         stones_rect = stones_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30))
         self.screen.blit(stones_surface, stones_rect)
         
         # Stones remaining
-        remaining_text = f"Stones Remaining: {self.stones_remaining}"
+        remaining_text = f"Stones Remaining: {self.level_manager.get_stones_remaining()}"
         remaining_surface = stats_font.render(remaining_text, True, (100, 100, 100))
         remaining_rect = remaining_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 10))
         self.screen.blit(remaining_surface, remaining_rect)

@@ -13,10 +13,11 @@ from game.config import INITIAL_STONES
 class Obstacle:
     """Obstacle entity (e.g., anti-ripple zone)."""
     
-    def __init__(self, obstacle_type: str, position: Vector2, size: Any):
-        self.type = obstacle_type  # "anti_ripple_zone"
+    def __init__(self, obstacle_type: str, position: Vector2, size: Any, blocks_ripple_rendering: bool = True):
+        self.type = obstacle_type  # "anti_ripple_zone", "wall", "whirlpool", etc.
         self.position = position.copy()
         self.size = size  # Can be Vector2 for rectangle or float for circle
+        self.blocks_ripple_rendering = blocks_ripple_rendering  # Whether ripples are visually blocked
     
     def is_point_inside(self, point: Vector2) -> bool:
         """Check if a point is inside this obstacle."""
@@ -41,7 +42,8 @@ class Obstacle:
         obstacle_type = data.get("type", "anti_ripple_zone")
         position = Vector2(data["position"][0], data["position"][1])
         size = data["size"]
-        return Obstacle(obstacle_type, position, size)
+        blocks_ripple_rendering = data.get("blocks_ripple_rendering", True)
+        return Obstacle(obstacle_type, position, size, blocks_ripple_rendering)
 
 
 class LevelData:
@@ -214,10 +216,15 @@ class LevelManager:
     def transition_to_next_level(self, ball_class) -> bool:
         """
         Transition to the next level.
+        Adds 10 stones to remaining stones when transitioning.
         Returns True if transition successful, False if no more levels.
         """
         if not self.has_next_level():
             return False
+        
+        # Add 10 stones when transitioning to next level
+        # Formula: stones_at_level_start = remaining_stones_from_previous + 10
+        self.stones_remaining += 10
         
         self.current_level_index += 1
         self.initialize_level(ball_class)
