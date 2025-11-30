@@ -6,7 +6,11 @@
       "target_position": [800, 300],
       "target_radius": 40,
       "obstacles": [],
-      "initial_stones": 10
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": [],
+      "initial_stones": 10,
+      "tutorial": true
     },
     {
       "id": 2,
@@ -18,6 +22,557 @@
           "type": "anti_ripple_zone",
           "position": [400, 300],
           "size": [100, 200]
+        }
+      ],
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": [],
+      "tutorial": true
+    },
+    {
+      "id": 3,
+      "ball_start": [150, 250],
+      "target_position": [800, 400],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [
+        {
+          "position": [500, 300],
+          "length": 200,
+          "rotation": 1.57
+        }
+      ],
+      "current_zones": [],
+      "whirlpools": [],
+      "tutorial": true
+    },
+    {
+      "id": 4,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [],
+      "current_zones": [
+        {
+          "position": [400, 250],
+          "size": [150, 100],
+          "strength": 150,
+          "direction": [0, 1]
+        }
+      ],
+      "whirlpools": [
+        {
+          "position": [500, 450],
+          "radius": 60,
+          "pull_strength": 120
+        }
+      ],
+      "tutorial": true
+    },
+    {
+      "id": 5,
+      "ball_start": [150, 200],
+      "target_position": [800, 450],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [350, 300],
+          "size": [120, 150]
+        }
+      ],
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": []
+    },
+    {
+      "id": 6,
+      "ball_start": [200, 300],
+      "target_position": [750, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [
+        {
+          "position": [400, 250],
+          "length": 180,
+          "rotation": 0.785
+        },
+        {
+          "position": [600, 400],
+          "length": 180,
+          "rotation": -0.785
+        }
+      ],
+      "current_zones": [],
+      "whirlpools": []
+    },
+    {
+      "id": 7,
+      "ball_start": [150, 350],
+      "target_position": [800, 250],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [],
+      "current_zones": [
+        {
+          "position": [350, 300],
+          "size": [200, 120],
+          "strength": 180,
+          "direction": [1, 0]
+        }
+      ],
+      "whirlpools": []
+    },
+    {
+      "id": 8,
+      "ball_start": [200, 300],
+      "target_position": [750, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": [
+        {
+          "position": [475, 300],
+          "radius": 70,
+          "pull_strength": 140
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [300, 250],
+          "size": [100, 120]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [500, 350],
+          "size": [100, 120]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [650, 250],
+          "size": [100, 120]
+        }
+      ],
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": []
+    },
+    {
+      "id": 10,
+      "ball_start": [150, 500],
+      "target_position": [800, 200],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [
+        {
+          "position": [300, 400],
+          "length": 150,
+          "rotation": 0.524
+        },
+        {
+          "position": [500, 350],
+          "length": 150,
+          "rotation": -0.524
+        },
+        {
+          "position": [700, 300],
+          "length": 150,
+          "rotation": 0.524
+        }
+      ],
+      "current_zones": [],
+      "whirlpools": []
+    },
+    {
+      "id": 11,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [],
+      "current_zones": [
+        {
+          "position": [250, 200],
+          "size": [150, 100],
+          "strength": 160,
+          "direction": [0, 1]
+        },
+        {
+          "position": [450, 400],
+          "size": [150, 100],
+          "strength": 160,
+          "direction": [0, -1]
+        },
+        {
+          "position": [650, 200],
+          "size": [150, 100],
+          "strength": 160,
+          "direction": [0, 1]
+        }
+      ],
+      "whirlpools": []
+    },
+    {
+      "id": 12,
+      "ball_start": [200, 300],
+      "target_position": [750, 300],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [],
+      "current_zones": [],
+      "whirlpools": [
+        {
+          "position": [350, 250],
+          "radius": 60,
+          "pull_strength": 130
+        },
+        {
+          "position": [600, 350],
+          "radius": 60,
+          "pull_strength": 130
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "ball_start": [150, 200],
+      "target_position": [800, 450],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [300, 300],
+          "size": [80, 180]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [500, 250],
+          "size": [120, 100]
+        }
+      ],
+      "walls": [
+        {
+          "position": [650, 350],
+          "length": 160,
+          "rotation": 1.047
+        }
+      ],
+      "current_zones": [],
+      "whirlpools": []
+    },
+    {
+      "id": 14,
+      "ball_start": [200, 400],
+      "target_position": [750, 250],
+      "target_radius": 40,
+      "obstacles": [],
+      "walls": [
+        {
+          "position": [400, 300],
+          "length": 140,
+          "rotation": 0
+        },
+        {
+          "position": [600, 400],
+          "length": 140,
+          "rotation": 1.57
+        }
+      ],
+      "current_zones": [
+        {
+          "position": [300, 250],
+          "size": [120, 100],
+          "strength": 170,
+          "direction": [1, 0]
+        }
+      ],
+      "whirlpools": []
+    },
+    {
+      "id": 15,
+      "ball_start": [150, 300],
+      "target_position": [800, 300],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [350, 300],
+          "size": [100, 150]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [600, 300],
+          "size": [100, 150]
+        }
+      ],
+      "walls": [
+        {
+          "position": [475, 220],
+          "length": 120,
+          "rotation": 0
+        },
+        {
+          "position": [475, 380],
+          "length": 120,
+          "rotation": 0
+        }
+      ],
+      "current_zones": [],
+      "whirlpools": [
+        {
+          "position": [475, 300],
+          "radius": 50,
+          "pull_strength": 140
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "ball_start": [150, 450],
+      "target_position": [800, 200],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [300, 350],
+          "size": [120, 100]
+        }
+      ],
+      "walls": [
+        {
+          "position": [450, 300],
+          "length": 180,
+          "rotation": 0.785
+        },
+        {
+          "position": [650, 350],
+          "length": 140,
+          "rotation": -0.524
+        }
+      ],
+      "current_zones": [
+        {
+          "position": [550, 450],
+          "size": [150, 100],
+          "strength": 190,
+          "direction": [0, -1]
+        }
+      ],
+      "whirlpools": []
+    },
+    {
+      "id": 17,
+      "ball_start": [200, 300],
+      "target_position": [750, 300],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [400, 250],
+          "size": [80, 100]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [550, 350],
+          "size": [80, 100]
+        }
+      ],
+      "walls": [],
+      "current_zones": [
+        {
+          "position": [300, 350],
+          "size": [120, 100],
+          "strength": 160,
+          "direction": [1, 0]
+        },
+        {
+          "position": [600, 200],
+          "size": [120, 100],
+          "strength": 160,
+          "direction": [-1, 0]
+        }
+      ],
+      "whirlpools": [
+        {
+          "position": [475, 300],
+          "radius": 55,
+          "pull_strength": 135
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "ball_start": [150, 200],
+      "target_position": [800, 450],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [300, 300],
+          "size": [100, 120]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [650, 300],
+          "size": [100, 120]
+        }
+      ],
+      "walls": [
+        {
+          "position": [400, 250],
+          "length": 150,
+          "rotation": 1.047
+        },
+        {
+          "position": [550, 400],
+          "length": 150,
+          "rotation": -1.047
+        }
+      ],
+      "current_zones": [
+        {
+          "position": [475, 500],
+          "size": [140, 80],
+          "strength": 180,
+          "direction": [0, -1]
+        }
+      ],
+      "whirlpools": [
+        {
+          "position": [475, 250],
+          "radius": 50,
+          "pull_strength": 145
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "ball_start": [150, 350],
+      "target_position": [800, 250],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [250, 250],
+          "size": [90, 120]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [450, 350],
+          "size": [90, 120]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [650, 250],
+          "size": [90, 120]
+        }
+      ],
+      "walls": [
+        {
+          "position": [350, 400],
+          "length": 130,
+          "rotation": 0.524
+        },
+        {
+          "position": [550, 200],
+          "length": 130,
+          "rotation": -0.524
+        }
+      ],
+      "current_zones": [
+        {
+          "position": [350, 200],
+          "size": [100, 80],
+          "strength": 170,
+          "direction": [1, 0]
+        },
+        {
+          "position": [600, 400],
+          "size": [100, 80],
+          "strength": 170,
+          "direction": [-1, 0]
+        }
+      ],
+      "whirlpools": [
+        {
+          "position": [475, 300],
+          "radius": 60,
+          "pull_strength": 150
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "ball_start": [200, 500],
+      "target_position": [750, 200],
+      "target_radius": 40,
+      "obstacles": [
+        {
+          "type": "anti_ripple_zone",
+          "position": [300, 400],
+          "size": [100, 100]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [500, 300],
+          "size": [100, 100]
+        },
+        {
+          "type": "anti_ripple_zone",
+          "position": [650, 400],
+          "size": [100, 100]
+        }
+      ],
+      "walls": [
+        {
+          "position": [350, 300],
+          "length": 140,
+          "rotation": 0.785
+        },
+        {
+          "position": [550, 450],
+          "length": 140,
+          "rotation": -0.785
+        },
+        {
+          "position": [700, 300],
+          "length": 140,
+          "rotation": 0.785
+        }
+      ],
+      "current_zones": [
+        {
+          "position": [250, 350],
+          "size": [120, 100],
+          "strength": 200,
+          "direction": [1, 0]
+        },
+        {
+          "position": [600, 250],
+          "size": [120, 100],
+          "strength": 200,
+          "direction": [0, 1]
+        }
+      ],
+      "whirlpools": [
+        {
+          "position": [400, 450],
+          "radius": 55,
+          "pull_strength": 140
+        },
+        {
+          "position": [600, 350],
+          "radius": 55,
+          "pull_strength": 140
         }
       ]
     }

@@ -97,7 +97,7 @@ class FadeTransition:
 
 
 class CameraShake:
-    """Handles camera shake effect for impacts."""
+    """Handles camera shake effect for impacts with damped oscillation."""
     
     def __init__(self):
         self.is_active = False
@@ -106,22 +106,29 @@ class CameraShake:
         self.elapsed = 0.0
         self.offset_x = 0
         self.offset_y = 0
+        self.frequency = 30.0  # Oscillation frequency (Hz)
+        self.damping = 8.0  # Damping coefficient
+        self.phase_x = 0.0  # Random phase for x oscillation
+        self.phase_y = 0.0  # Random phase for y oscillation
     
-    def start_shake(self, intensity: float = 10.0, duration: float = 0.3):
+    def start_shake(self, intensity: float = 3.0, duration: float = 0.125):
         """
-        Start camera shake effect.
+        Start camera shake effect with damped oscillation.
         
         Args:
-            intensity: Maximum shake offset in pixels
-            duration: Duration of shake in seconds
+            intensity: Maximum shake offset in pixels (2-4 pixels recommended)
+            duration: Duration of shake in seconds (0.1-0.15s recommended)
         """
         self.is_active = True
         self.intensity = intensity
         self.duration = duration
         self.elapsed = 0.0
+        # Randomize phase for each shake to vary the pattern
+        self.phase_x = random.uniform(0, 2 * math.pi)
+        self.phase_y = random.uniform(0, 2 * math.pi)
     
     def update(self, dt: float):
-        """Update shake effect."""
+        """Update shake effect with damped oscillation."""
         if not self.is_active:
             self.offset_x = 0
             self.offset_y = 0
@@ -136,13 +143,13 @@ class CameraShake:
             self.offset_y = 0
             return
         
-        # Calculate shake intensity with decay
-        progress = self.elapsed / self.duration
-        current_intensity = self.intensity * (1.0 - progress)
+        # Damped oscillation formula: A * e^(-damping * t) * sin(2π * frequency * t + phase)
+        t = self.elapsed
+        damping_factor = math.exp(-self.damping * t)
         
-        # Generate random offset
-        self.offset_x = random.uniform(-current_intensity, current_intensity)
-        self.offset_y = random.uniform(-current_intensity, current_intensity)
+        # Calculate oscillating offset with damping
+        self.offset_x = self.intensity * damping_factor * math.sin(2 * math.pi * self.frequency * t + self.phase_x)
+        self.offset_y = self.intensity * damping_factor * math.sin(2 * math.pi * self.frequency * t + self.phase_y)
     
     def get_offset(self) -> tuple:
         """Get current camera offset as (x, y) tuple."""

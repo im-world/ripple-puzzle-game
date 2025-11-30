@@ -1,4 +1,10 @@
 .kiro
 .kiro/*
+.venv
+.venv/*
+.vscode
+.cursor
+.cursor/*
+.DS_Store
 __pycache__
 */__pycache_/*

@@ -181,6 +181,8 @@ class WaveSimulator:
     def __init__(self):
         self.active_ripples: List[Ripple] = []
         self.obstacles = []  # List of obstacles that block wave propagation
+        self.walls = []  # List of walls that reflect ripples
+        self.current_zones = []  # List of current zones that affect ripple propagation
     
     def create_ripple(self, position: Vector2, amplitude: float = RIPPLE_MAX_AMPLITUDE):
         """Create a new ripple at the specified position."""
@@ -189,6 +191,7 @@ class WaveSimulator:
     
     def update(self, dt: float = 0.0):
         """Update wave simulation, removing expired ripples."""
+        # Remove expired ripples
         self.active_ripples = [r for r in self.active_ripples if not r.is_expired()]
     
     def calculate_force_at(self, position: Vector2) -> Vector2:
@@ -218,6 +221,58 @@ class WaveSimulator:
     def set_obstacles(self, obstacles):
         """Set obstacles that block wave propagation."""
         self.obstacles = obstacles
+    
+    def set_walls(self, walls):
+        """Set walls that reflect ripples."""
+        self.walls = walls
+    
+    def set_current_zones(self, current_zones):
+        """Set current zones that affect ball and ripple propagation."""
+        self.current_zones = current_zones
+    
+    def set_whirlpools(self, whirlpools):
+        """Set whirlpools that affect ball physics."""
+        # Whirlpools don't affect wave propagation, only ball physics
+        # This method exists for API consistency
+        pass
+    
+    def create_reflected_ripple(self, original_ripple: Ripple, wall):
+        """
+        Create a reflected ripple when a ripple hits a wall.
+        The reflected ripple maintains amplitude and reflects at angle of incidence.
+        
+        Args:
+            original_ripple: The ripple that hit the wall
+            wall: The wall that caused the reflection
+        """
+        # Get closest point on wall (reflection point)
+        reflection_point = wall.get_closest_point_on_wall(original_ripple.position)
+        
+        # Calculate incident direction (from ripple center to reflection point)
+        to_wall = reflection_point - original_ripple.position
+        distance = to_wall.magnitude()
+        
+        if distance < 0.1:
+            return  # Too close to calculate direction
+        
+        incident = to_wall.normalize()
+        
+        # Get reflected direction using wall normal
+        reflected_direction = wall.get_reflection_vector(incident)
+        
+        # Create new ripple on the reflected side
+        # Position it at the reflection point, slightly offset in reflected direction
+        reflected_position = reflection_point + reflected_direction * 15
+        
+        # Maintain amplitude through reflection (with slight loss for realism)
+        current_amplitude = original_ripple.get_current_amplitude() * 0.9
+        
+        # Create reflected ripple with maintained amplitude
+        reflected_ripple = Ripple(reflected_position, current_amplitude)
+        # Adjust creation time to match original ripple's age (so it continues propagating)
+        reflected_ripple.creation_time = original_ripple.creation_time
+        
+        self.active_ripples.append(reflected_ripple)
 
 
 class BallPhysics:
@@ -226,14 +281,34 @@ class BallPhysics:
     def __init__(self, ball: Ball, wave_simulator: WaveSimulator):
         self.ball = ball
         self.wave_simulator = wave_simulator
+        self.walls = []  # List of walls for collision detection
+        self.current_zones = []  # List of current zones for force application
+        self.whirlpools = []  # List of whirlpools for force application
+    
+    def set_walls(self, walls):
+        """Set walls for collision detection."""
+        self.walls = walls
+    
+    def set_current_zones(self, current_zones):
+        """Set current zones for force application."""
+        self.current_zones = current_zones
+    
+    def set_whirlpools(self, whirlpools):
+        """Set whirlpools for force application."""
+        self.whirlpools = whirlpools if whirlpools else []
     
     def update(self, dt: float):
         """
         Update ball physics for one frame.
-        Steps: calculate forces -> apply forces -> apply friction -> update position -> clamp velocity -> boundary collision
+        Steps: calculate forces -> apply forces -> apply friction -> update position -> clamp velocity -> boundary collision -> wall collision
         """
         # Calculate net force from all active ripples
         net_force = self.wave_simulator.calculate_force_at(self.ball.position)
+        
+        # Add forces from current zones (if ball is inside any)
+        for current_zone in self.current_zones:
+            zone_force = current_zone.get_force_at(self.ball.position)
+            net_force = net_force + zone_force
         
         # Apply force to update velocity
         self.ball.apply_force(net_force, dt)
@@ -249,3 +324,9 @@ class BallPhysics:
         
         # Keep ball within pool boundaries
         self.ball.keep_in_bounds(WATER_POOL_RECT)
+        
+        # Check wall collisions and bounce
+        from game.level import CollisionDetector
+        for wall in self.walls:
+            if CollisionDetector.check_ball_wall_collision(self.ball.position, self.ball.radius, wall):
+                CollisionDetector.handle_ball_wall_bounce(self.ball, wall)

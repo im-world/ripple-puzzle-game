@@ -1,0 +1,41 @@
+{
+  "name": "Untitled Level",
+  "ball_start": [
+    100,
+    300
+  ],
+  "target_position": [
+    700,
+    300
+  ],
+  "target_radius": 40,
+  "obstacles": [
+    {
+      "type": "wall",
+      "position": [
+        400,
+        250
+      ],
+      "length": 150,
+      "rotation": 0.0
+    },
+    {
+      "type": "wall",
+      "position": [
+        400,
+        350
+      ],
+      "length": 150,
+      "rotation": 0.0
+    },
+    {
+      "type": "wall",
+      "position": [
+        250,
+        300
+      ],
+      "length": 150,
+      "rotation": 0.0
+    }
+  ]
+}

@@ -12,7 +12,7 @@ from game.fish import Fish
 from game.config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, WATER_POOL_RECT,
     COLOR_WATER_LIGHT, COLOR_WATER_DARK, COLOR_BALL, COLOR_TARGET, COLOR_START,
-    COLOR_STONE, COLOR_UI_TEXT, COLOR_TRAJECTORY, BALL_RADIUS
+    COLOR_STONE, COLOR_UI_TEXT, COLOR_TRAJECTORY, BALL_RADIUS, HIGH_CONTRAST_COLORS
 )
 
 
@@ -32,14 +32,49 @@ class Renderer:
         pygame.font.init()
         self.font = pygame.font.SysFont('Arial', 24)
         self.font_large = pygame.font.SysFont('Arial', 32)
+        
+        # Environment system reference (set externally)
+        self.environment = None
+        
+        # High-contrast mode flag
+        self.high_contrast_mode = False
+    
+    def set_high_contrast_mode(self, enabled: bool):
+        """
+        Enable or disable high-contrast mode for accessibility.
+        
+        Args:
+            enabled: True to enable high-contrast mode, False to disable
+        """
+        self.high_contrast_mode = enabled
+    
+    def get_color(self, color_name: str, default_color: tuple) -> tuple:
+        """
+        Get color based on high-contrast mode setting.
+        
+        Args:
+            color_name: Name of the color in HIGH_CONTRAST_COLORS
+            default_color: Default color to use when high-contrast mode is off
+        
+        Returns:
+            Color tuple (R, G, B) or (R, G, B, A)
+        """
+        if self.high_contrast_mode and color_name in HIGH_CONTRAST_COLORS:
+            return HIGH_CONTRAST_COLORS[color_name]
+        return default_color
     
     def render_frame(self):
         """
         Main render method that clears screen and draws all layers.
         Call this once per frame.
         """
-        # Clear screen
-        self.screen.fill((200, 220, 240))  # Light background
+        # Clear screen with environment background color or high-contrast background
+        if self.high_contrast_mode:
+            self.screen.fill(self.get_color('background', (200, 220, 240)))
+        elif self.environment:
+            self.screen.fill(self.environment.get_background_color())
+        else:
+            self.screen.fill((200, 220, 240))  # Light background (default)
         
         # Render water base layer
         self._render_water_surface()
@@ -48,16 +83,26 @@ class Renderer:
         """Render water pool with enhanced pastel blue gradient background."""
         x, y, width, height = WATER_POOL_RECT
         
-        # Create smooth gradient from light to dark blue (top to bottom)
+        # Get water colors from environment system or high-contrast mode
+        if self.high_contrast_mode:
+            water_light = self.get_color('water_light', COLOR_WATER_LIGHT)
+            water_dark = self.get_color('water_dark', COLOR_WATER_DARK)
+        elif self.environment:
+            water_light, water_dark = self.environment.get_water_colors()
+        else:
+            water_light = COLOR_WATER_LIGHT
+            water_dark = COLOR_WATER_DARK
+        
+        # Create smooth gradient from light to dark (top to bottom)
         for i in range(height):
             # Interpolate between light and dark colors with smooth curve
             ratio = i / height
             # Apply easing for smoother gradient
             smooth_ratio = ratio * ratio * (3 - 2 * ratio)  # Smoothstep
             
-            r = int(COLOR_WATER_LIGHT[0] * (1 - smooth_ratio) + COLOR_WATER_DARK[0] * smooth_ratio)
-            g = int(COLOR_WATER_LIGHT[1] * (1 - smooth_ratio) + COLOR_WATER_DARK[1] * smooth_ratio)
-            b = int(COLOR_WATER_LIGHT[2] * (1 - smooth_ratio) + COLOR_WATER_DARK[2] * smooth_ratio)
+            r = int(water_light[0] * (1 - smooth_ratio) + water_dark[0] * smooth_ratio)
+            g = int(water_light[1] * (1 - smooth_ratio) + water_dark[1] * smooth_ratio)
+            b = int(water_light[2] * (1 - smooth_ratio) + water_dark[2] * smooth_ratio)
             
             pygame.draw.line(self.screen, (r, g, b), (x, y + i), (x + width, y + i))
         
@@ -99,11 +144,12 @@ class Renderer:
                                           shadow_pos[1] - shadow_size // 2))
         
         # Draw main ball with enhanced gradient effect
+        ball_color = self.get_color('ball', COLOR_BALL)
         for i in range(radius, 0, -1):
             # Lighter in center, darker at edges with smoother gradient
             ratio = i / radius
             # Enhanced gradient calculation
-            color = tuple(int(c * (ratio * 0.7 + 0.3) + 255 * (1 - ratio) * 0.3) for c in COLOR_BALL)
+            color = tuple(int(c * (ratio * 0.7 + 0.3) + 255 * (1 - ratio) * 0.3) for c in ball_color)
             pygame.draw.circle(self.screen, color, pos, i)
         
         # Add highlight for 3D effect
@@ -132,14 +178,15 @@ class Renderer:
         self.screen.blit(shadow_surface, (pos[0] - r - 5, pos[1] - r - 5))
         
         # Draw gradient filled circle
+        start_color = self.get_color('start', COLOR_START)
         for i in range(r - 5, 0, -1):
             ratio = i / (r - 5)
             alpha = int(150 * ratio)
-            color = (*COLOR_START, alpha)
+            color = (*start_color, alpha)
             pygame.draw.circle(self.screen, color, pos, i)
         
         # Draw outer ring
-        pygame.draw.circle(self.screen, COLOR_START, pos, r, 3)
+        pygame.draw.circle(self.screen, start_color, pos, r, 3)
     
     def render_target_spot(self, position: Vector2, radius: float = 40):
         """
@@ -166,15 +213,194 @@ class Renderer:
         self.screen.blit(shadow_surface, (pos[0] - r_pulsed - 5, pos[1] - r_pulsed - 5))
         
         # Draw gradient filled circle
+        target_color = self.get_color('target', COLOR_TARGET)
         for i in range(r_pulsed - 5, 0, -1):
             ratio = i / (r_pulsed - 5)
             alpha = int(150 * ratio)
-            color = (*COLOR_TARGET, alpha)
+            color = (*target_color, alpha)
             pygame.draw.circle(self.screen, color, pos, i)
         
         # Draw outer ring with pulsing
         ring_alpha = int(200 + 55 * math.sin(time.time() * 2))
-        pygame.draw.circle(self.screen, (*COLOR_TARGET, ring_alpha), pos, r_pulsed, 3)
+        pygame.draw.circle(self.screen, (*target_color, ring_alpha), pos, r_pulsed, 3)
+    
+    def render_wall(self, wall):
+        """
+        Render wall with stone/wood texture (zen aesthetic).
+        
+        Args:
+            wall: Wall object to render
+        """
+        import math
+        
+        # Calculate wall endpoints
+        start_pos = (int(wall.start.x), int(wall.start.y))
+        end_pos = (int(wall.end.x), int(wall.end.y))
+        
+        # Wall colors - stone/wood zen aesthetic or high-contrast
+        if self.high_contrast_mode:
+            wall_color = self.get_color('wall', (139, 119, 101))
+            highlight_color = tuple(min(255, c + 30) for c in wall_color)
+            shadow_color = tuple(max(0, c - 30) for c in wall_color)
+        else:
+            wall_color = (139, 119, 101)  # Warm stone/wood color
+            highlight_color = (169, 149, 131)  # Lighter shade
+            shadow_color = (109, 89, 71)  # Darker shade
+        
+        # Draw wall with thickness
+        thickness = int(wall.thickness)
+        
+        # Calculate perpendicular offset for thickness
+        perp_x = -math.sin(wall.rotation) * thickness / 2
+        perp_y = math.cos(wall.rotation) * thickness / 2
+        
+        # Create polygon points for wall rectangle
+        points = [
+            (start_pos[0] + perp_x, start_pos[1] + perp_y),
+            (end_pos[0] + perp_x, end_pos[1] + perp_y),
+            (end_pos[0] - perp_x, end_pos[1] - perp_y),
+            (start_pos[0] - perp_x, start_pos[1] - perp_y)
+        ]
+        
+        # Draw shadow for depth
+        shadow_points = [(p[0] + 2, p[1] + 2) for p in points]
+        shadow_surface = pygame.Surface((int(wall.length + 20), thickness + 20), pygame.SRCALPHA)
+        pygame.draw.polygon(self.screen, (*shadow_color, 100), shadow_points)
+        
+        # Draw main wall body
+        pygame.draw.polygon(self.screen, wall_color, points)
+        
+        # Draw highlight edge (top/left side)
+        pygame.draw.line(self.screen, highlight_color, points[0], points[1], 2)
+        
+        # Draw shadow edge (bottom/right side)
+        pygame.draw.line(self.screen, shadow_color, points[2], points[3], 2)
+        
+        # Draw texture lines for stone/wood effect
+        num_segments = int(wall.length / 30)  # Segment every 30 pixels
+        for i in range(1, num_segments):
+            t = i / num_segments
+            # Calculate position along wall
+            seg_x = wall.start.x + (wall.end.x - wall.start.x) * t
+            seg_y = wall.start.y + (wall.end.y - wall.start.y) * t
+            
+            # Draw subtle texture line
+            line_start = (int(seg_x + perp_x * 0.8), int(seg_y + perp_y * 0.8))
+            line_end = (int(seg_x - perp_x * 0.8), int(seg_y - perp_y * 0.8))
+            pygame.draw.line(self.screen, shadow_color, line_start, line_end, 1)
+        
+        # Draw border outline
+        pygame.draw.polygon(self.screen, (80, 60, 40), points, 2)
+    
+    def render_current_zone(self, current_zone, time_offset: float = 0):
+        """
+        Render current zone with animated arrows showing current direction.
+        
+        Args:
+            current_zone: CurrentZone object to render
+            time_offset: Time offset for animation
+        """
+        import time
+        
+        width, height = current_zone.size
+        rect = pygame.Rect(
+            int(current_zone.position.x - width / 2),
+            int(current_zone.position.y - height / 2),
+            int(width),
+            int(height)
+        )
+        
+        # Create semi-transparent surface for zone background
+        temp_surface = pygame.Surface((int(width), int(height)), pygame.SRCALPHA)
+        
+        # Color based on strength (light blue for water current) or high-contrast
+        current_zone_color = self.get_color('current_zone', (100, 150, 200))
+        alpha = min(120, int(50 + current_zone.strength * 0.5))
+        pygame.draw.rect(temp_surface, (*current_zone_color, alpha), temp_surface.get_rect())
+        border_color = tuple(max(0, c - 20) for c in current_zone_color)
+        pygame.draw.rect(temp_surface, border_color, temp_surface.get_rect(), 2)
+        
+        self.screen.blit(temp_surface, rect.topleft)
+        
+        # Draw animated arrows showing current direction
+        arrow_spacing = 40  # Space between arrows
+        arrow_size = 20
+        
+        # Calculate number of arrows to fit in the zone
+        num_arrows_x = max(1, int(width / arrow_spacing))
+        num_arrows_y = max(1, int(height / arrow_spacing))
+        
+        # Animation offset (arrows move in current direction)
+        anim_time = time.time() + time_offset
+        anim_offset = (anim_time * 30) % arrow_spacing  # Move 30 pixels per second
+        
+        # Calculate arrow direction angle
+        angle = math.atan2(current_zone.direction.y, current_zone.direction.x)
+        
+        # Draw arrows in a grid pattern
+        for i in range(num_arrows_x + 1):
+            for j in range(num_arrows_y + 1):
+                # Calculate arrow position with animation offset
+                base_x = rect.left + (i * arrow_spacing) + (width % arrow_spacing) / 2
+                base_y = rect.top + (j * arrow_spacing) + (height % arrow_spacing) / 2
+                
+                # Apply animation offset in current direction
+                arrow_x = base_x + current_zone.direction.x * anim_offset
+                arrow_y = base_y + current_zone.direction.y * anim_offset
+                
+                # Wrap around to create continuous flow
+                while arrow_x < rect.left:
+                    arrow_x += width
+                while arrow_x > rect.right:
+                    arrow_x -= width
+                while arrow_y < rect.top:
+                    arrow_y += height
+                while arrow_y > rect.bottom:
+                    arrow_y -= height
+                
+                # Only draw if inside zone
+                if rect.collidepoint(int(arrow_x), int(arrow_y)):
+                    self._draw_arrow(int(arrow_x), int(arrow_y), angle, arrow_size)
+    
+    def _draw_arrow(self, x: int, y: int, angle: float, size: int):
+        """
+        Draw an arrow at the specified position and angle.
+        
+        Args:
+            x, y: Arrow position
+            angle: Arrow direction in radians
+            size: Arrow size in pixels
+        """
+        # Calculate arrow points
+        # Arrow head
+        head_x = x + size * math.cos(angle)
+        head_y = y + size * math.sin(angle)
+        
+        # Arrow tail
+        tail_x = x - size * 0.3 * math.cos(angle)
+        tail_y = y - size * 0.3 * math.sin(angle)
+        
+        # Arrow wings
+        wing_angle = 2.5  # Radians
+        wing_length = size * 0.6
+        
+        left_wing_x = head_x - wing_length * math.cos(angle + wing_angle)
+        left_wing_y = head_y - wing_length * math.sin(angle + wing_angle)
+        
+        right_wing_x = head_x - wing_length * math.cos(angle - wing_angle)
+        right_wing_y = head_y - wing_length * math.sin(angle - wing_angle)
+        
+        # Draw arrow shaft
+        pygame.draw.line(self.screen, (255, 255, 255), (int(tail_x), int(tail_y)), 
+                        (int(head_x), int(head_y)), 3)
+        
+        # Draw arrow head
+        arrow_points = [
+            (int(head_x), int(head_y)),
+            (int(left_wing_x), int(left_wing_y)),
+            (int(right_wing_x), int(right_wing_y))
+        ]
+        pygame.draw.polygon(self.screen, (255, 255, 255), arrow_points)
     
     def render_obstacle(self, obstacle):
         """
@@ -184,6 +410,9 @@ class Renderer:
             obstacle: Obstacle object to render
         """
         if obstacle.type == "anti_ripple_zone":
+            # Get obstacle color
+            obstacle_color = self.get_color('obstacle', (100, 100, 100))
+            
             # Render as semi-transparent gray rectangle or circle
             if isinstance(obstacle.size, (list, tuple)) and len(obstacle.size) == 2:
                 # Rectangle obstacle
@@ -196,7 +425,7 @@ class Renderer:
                 )
                 # Create semi-transparent surface
                 temp_surface = pygame.Surface((int(width), int(height)), pygame.SRCALPHA)
-                pygame.draw.rect(temp_surface, (100, 100, 100, 100), temp_surface.get_rect())
+                pygame.draw.rect(temp_surface, (*obstacle_color, 100), temp_surface.get_rect())
                 pygame.draw.rect(temp_surface, (80, 80, 80), temp_surface.get_rect(), 2)
                 self.screen.blit(temp_surface, rect.topleft)
             elif isinstance(obstacle.size, (int, float)):
@@ -206,7 +435,7 @@ class Renderer:
                 # Create semi-transparent surface
                 size = radius * 2
                 temp_surface = pygame.Surface((size, size), pygame.SRCALPHA)
-                pygame.draw.circle(temp_surface, (100, 100, 100, 100), (radius, radius), radius)
+                pygame.draw.circle(temp_surface, (*obstacle_color, 100), (radius, radius), radius)
                 pygame.draw.circle(temp_surface, (80, 80, 80), (radius, radius), radius, 2)
                 self.screen.blit(temp_surface, (pos[0] - radius, pos[1] - radius))
     
@@ -230,6 +459,9 @@ class Renderer:
         # Get alpha for fade out
         alpha = stone.get_alpha()
         
+        # Get stone color
+        stone_color = self.get_color('stone', COLOR_STONE)
+        
         # Create surface with alpha for transparency
         if alpha < 1.0:
             # Create temporary surface for alpha blending
@@ -237,14 +469,14 @@ class Renderer:
             temp_pos = (radius + 2, radius + 2)
             
             # Draw stone on temp surface
-            color_with_alpha = (*COLOR_STONE, int(255 * alpha))
+            color_with_alpha = (*stone_color, int(255 * alpha))
             pygame.draw.circle(temp_surface, color_with_alpha, temp_pos, radius)
             
             # Blit to screen
             self.screen.blit(temp_surface, (pos[0] - radius - 2, pos[1] - radius - 2))
         else:
             # Draw normally without alpha
-            pygame.draw.circle(self.screen, COLOR_STONE, pos, radius)
+            pygame.draw.circle(self.screen, stone_color, pos, radius)
             
             # Add highlight for 3D effect
             highlight_pos = (pos[0] - radius // 3, pos[1] - radius // 3)
@@ -298,9 +530,13 @@ class Renderer:
             # Alpha decreases towards outer rings with smoother falloff
             ring_alpha = int(alpha * 255 * (1 - ring_ratio * 0.8) * (1 - ring_ratio * 0.2))
             
-            # Enhanced color: white with blue tint and slight variation
-            blue_tint = int(200 + 30 * (1 - ring_ratio))
-            color = (blue_tint, blue_tint + 20, 255, ring_alpha)
+            # Enhanced color: white with blue tint and slight variation or high-contrast
+            if self.high_contrast_mode:
+                ripple_color = self.get_color('ripple', (0, 100, 200))
+                color = (*ripple_color, ring_alpha)
+            else:
+                blue_tint = int(200 + 30 * (1 - ring_ratio))
+                color = (blue_tint, blue_tint + 20, 255, ring_alpha)
             
             # Draw ring with varying thickness
             thickness = max(1, int(ring_radius * 0.15))
@@ -354,16 +590,22 @@ class Renderer:
         for ripple in ripples:
             self.render_ripple(ripple, obstacles)
 
-    def render_stone_counter(self, stones_remaining: int):
+    def render_stone_counter(self, stones_remaining: int, zen_mode: bool = False):
         """
         Render stone counter at top center with enhanced styling.
+        Display infinity symbol (∞) when in Zen mode.
         
         Args:
             stones_remaining: Number of stones remaining
+            zen_mode: Whether Zen mode is enabled
         """
-        # Render text
-        text = f"Stones: {stones_remaining}"
-        text_surface = self.font_large.render(text, True, COLOR_UI_TEXT)
+        # Render text with infinity symbol in Zen mode
+        if zen_mode:
+            text = "Stones: ∞"
+        else:
+            text = f"Stones: {stones_remaining}"
+        ui_text_color = self.get_color('ui_text', COLOR_UI_TEXT)
+        text_surface = self.font_large.render(text, True, ui_text_color)
         text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, 40))
         
         # Draw enhanced background with gradient and shadow
@@ -400,9 +642,10 @@ class Renderer:
         pygame.draw.circle(self.screen, (100, 100, 100, 100), (icon_x + 1, icon_y + 1), icon_radius)
         
         # Icon with gradient
+        stone_color = self.get_color('stone', COLOR_STONE)
         for i in range(icon_radius, 0, -1):
             ratio = i / icon_radius
-            color = tuple(int(c * ratio) for c in COLOR_STONE)
+            color = tuple(int(c * ratio) for c in stone_color)
             pygame.draw.circle(self.screen, color, (icon_x, icon_y), i)
         
         # Highlight
@@ -671,3 +914,275 @@ class Renderer:
         """
         for fish in fish_list:
             self.render_fish(fish)
+    
+    def render_whirlpool(self, whirlpool, time_offset: float = 0):
+        """
+        Render whirlpool with swirling water animation and rotating effect.
+        
+        Args:
+            whirlpool: Whirlpool object to render
+            time_offset: Time offset for animation
+        """
+        import time
+        
+        pos = (int(whirlpool.position.x), int(whirlpool.position.y))
+        radius = int(whirlpool.radius)
+        center_threshold = int(whirlpool.center_threshold)
+        
+        # Animation time for rotation
+        anim_time = time.time() + time_offset
+        rotation_speed = 2.0  # Radians per second
+        rotation_angle = (anim_time * rotation_speed) % (2 * math.pi)
+        
+        # Create surface for whirlpool with alpha
+        size = radius * 2 + 10
+        temp_surface = pygame.Surface((size, size), pygame.SRCALPHA)
+        center = (size // 2, size // 2)
+        
+        # Draw base whirlpool gradient (darker in center)
+        num_rings = 20
+        for i in range(num_rings):
+            ring_ratio = (i + 1) / num_rings
+            ring_radius = int(radius * ring_ratio)
+            
+            if ring_radius < 1:
+                continue
+            
+            # Color: darker blue in center, lighter at edges or high-contrast
+            # Alpha increases toward center
+            darkness = 1.0 - ring_ratio * 0.7  # 0.3 to 1.0
+            alpha = int(120 * (1.0 - ring_ratio * 0.5))  # More opaque in center
+            
+            if self.high_contrast_mode:
+                whirlpool_color = self.get_color('whirlpool', (0, 0, 150))
+                color = (
+                    int(whirlpool_color[0] * darkness),
+                    int(whirlpool_color[1] * darkness),
+                    int(whirlpool_color[2] * darkness),
+                    alpha
+                )
+            else:
+                color = (
+                    int(80 * darkness),
+                    int(120 * darkness),
+                    int(180 * darkness),
+                    alpha
+                )
+            
+            pygame.draw.circle(temp_surface, color, center, ring_radius)
+        
+        # Draw rotating spiral lines for swirling effect
+        num_spirals = 6
+        spiral_segments = 30
+        
+        for spiral_idx in range(num_spirals):
+            spiral_angle_offset = (spiral_idx * 2 * math.pi / num_spirals) + rotation_angle
+            
+            points = []
+            for seg in range(spiral_segments):
+                # Spiral from edge to center
+                t = seg / spiral_segments  # 0 at edge, 1 at center
+                
+                # Radius decreases as we spiral inward
+                seg_radius = radius * (1.0 - t)
+                
+                # Angle increases as we spiral inward (creates spiral)
+                seg_angle = spiral_angle_offset + t * 4 * math.pi
+                
+                # Calculate position
+                seg_x = center[0] + seg_radius * math.cos(seg_angle)
+                seg_y = center[1] + seg_radius * math.sin(seg_angle)
+                
+                points.append((int(seg_x), int(seg_y)))
+            
+            # Draw spiral line with varying alpha
+            if len(points) > 1:
+                for i in range(len(points) - 1):
+                    t = i / len(points)
+                    alpha = int(150 * (1.0 - t * 0.5))  # Fade toward center
+                    
+                    # Create small surface for line segment with alpha
+                    p1, p2 = points[i], points[i + 1]
+                    pygame.draw.line(temp_surface, (200, 220, 255, alpha), p1, p2, 2)
+        
+        # Draw danger zone in center (red tint)
+        danger_rings = 8
+        for i in range(danger_rings):
+            ring_ratio = (i + 1) / danger_rings
+            ring_radius = int(center_threshold * ring_ratio)
+            
+            if ring_radius < 1:
+                continue
+            
+            # Red warning color with pulsing alpha
+            pulse = abs(math.sin(anim_time * 3))
+            alpha = int((100 + pulse * 50) * (1.0 - ring_ratio * 0.5))
+            
+            color = (200, 50, 50, alpha)
+            pygame.draw.circle(temp_surface, color, center, ring_radius)
+        
+        # Draw center point (dark)
+        pygame.draw.circle(temp_surface, (30, 30, 60, 200), center, max(3, center_threshold // 3))
+        
+        # Blit to screen
+        self.screen.blit(temp_surface, (pos[0] - size // 2, pos[1] - size // 2))
+        
+        # Draw outer ring border
+        pygame.draw.circle(self.screen, (60, 100, 150), pos, radius, 2)
+        
+        # Draw rotating particles around the edge for extra effect
+        num_particles = 12
+        for i in range(num_particles):
+            particle_angle = (i * 2 * math.pi / num_particles) + rotation_angle * 1.5
+            particle_radius = radius - 5
+            
+            particle_x = pos[0] + particle_radius * math.cos(particle_angle)
+            particle_y = pos[1] + particle_radius * math.sin(particle_angle)
+            
+            # Small white particle
+            pygame.draw.circle(self.screen, (200, 220, 255), 
+                             (int(particle_x), int(particle_y)), 3)
+
+    def render_star(self, x: int, y: int, size: int, filled: bool = True, fill_progress: float = 1.0):
+        """
+        Render a star shape at the specified position.
+        
+        Args:
+            x, y: Center position of the star
+            size: Size of the star (radius)
+            filled: Whether to fill the star or just draw outline
+            fill_progress: Progress of fill animation (0.0 to 1.0)
+        """
+        # Calculate star points (5-pointed star)
+        points = []
+        num_points = 5
+        
+        for i in range(num_points * 2):
+            angle = (i * math.pi / num_points) - math.pi / 2  # Start from top
+            
+            # Alternate between outer and inner points
+            if i % 2 == 0:
+                # Outer point
+                radius = size
+            else:
+                # Inner point (smaller radius)
+                radius = size * 0.4
+            
+            point_x = x + radius * math.cos(angle)
+            point_y = y + radius * math.sin(angle)
+            points.append((int(point_x), int(point_y)))
+        
+        if filled:
+            # Draw filled star with animation
+            if fill_progress < 1.0:
+                # Create clipping mask for partial fill
+                # Draw from bottom up based on progress
+                clip_height = int(size * 2 * (1.0 - fill_progress))
+                
+                # Create temporary surface for star
+                temp_surface = pygame.Surface((size * 2 + 10, size * 2 + 10), pygame.SRCALPHA)
+                temp_center = (size + 5, size + 5)
+                
+                # Adjust points for temp surface
+                temp_points = [(int(p[0] - x + temp_center[0]), int(p[1] - y + temp_center[1])) for p in points]
+                
+                # Draw filled star
+                pygame.draw.polygon(temp_surface, (255, 215, 0), temp_points)  # Gold color
+                
+                # Draw outline
+                pygame.draw.polygon(temp_surface, (200, 170, 0), temp_points, 2)
+                
+                # Create clip rect (reveal from bottom to top)
+                clip_rect = pygame.Rect(0, clip_height, size * 2 + 10, size * 2 + 10 - clip_height)
+                temp_surface.set_clip(clip_rect)
+                
+                # Blit to screen
+                self.screen.blit(temp_surface, (x - size - 5, y - size - 5))
+            else:
+                # Draw fully filled star
+                pygame.draw.polygon(self.screen, (255, 215, 0), points)  # Gold color
+                pygame.draw.polygon(self.screen, (200, 170, 0), points, 2)  # Darker outline
+                
+                # Add highlight for shine effect
+                highlight_size = int(size * 0.3)
+                highlight_pos = (x - size // 3, y - size // 3)
+                pygame.draw.circle(self.screen, (255, 255, 200, 150), highlight_pos, highlight_size)
+        else:
+            # Draw outline only (empty star)
+            pygame.draw.polygon(self.screen, (180, 180, 180), points, 3)  # Gray outline
+    
+    def render_star_rating(self, x: int, y: int, stars: int, animation_progress: float = 1.0):
+        """
+        Render star rating display with animation.
+        
+        Args:
+            x, y: Center position for the star rating display
+            stars: Number of stars to display (0-3)
+            animation_progress: Animation progress (0.0 to 1.0)
+        """
+        star_size = 40
+        star_spacing = 80
+        
+        # Calculate starting x position to center the stars
+        total_width = star_spacing * 2  # 3 stars with 2 gaps
+        start_x = x - total_width // 2
+        
+        # Render 3 stars
+        for i in range(3):
+            star_x = start_x + i * star_spacing
+            star_y = y
+            
+            # Determine if this star should be filled
+            filled = i < stars
+            
+            # Calculate fill progress for this star based on animation
+            # Stars fill in sequence
+            if animation_progress >= 1.0:
+                fill_progress = 1.0
+            else:
+                # Each star gets 1/3 of the animation time
+                star_start = i / 3.0
+                star_end = (i + 1) / 3.0
+                
+                if animation_progress < star_start:
+                    fill_progress = 0.0
+                elif animation_progress > star_end:
+                    fill_progress = 1.0
+                else:
+                    # Interpolate within this star's time window
+                    fill_progress = (animation_progress - star_start) / (star_end - star_start)
+            
+            # Add bounce effect during animation
+            if fill_progress < 1.0 and filled:
+                bounce = abs(math.sin(fill_progress * math.pi)) * 10
+                star_y -= int(bounce)
+            
+            # Render the star
+            self.render_star(star_x, star_y, star_size, filled, fill_progress if filled else 1.0)
+    
+    def render_peace_rating(self, x: int, y: int):
+        """
+        Render "Peace" rating for Zen mode instead of stars.
+        
+        Args:
+            x, y: Center position for the peace rating display
+        """
+        # Render "Peace" text with zen aesthetic
+        peace_font = pygame.font.SysFont('Arial', 48, bold=True)
+        peace_surface = peace_font.render("Peace", True, (100, 180, 150))  # Calm green color
+        peace_rect = peace_surface.get_rect(center=(x, y))
+        
+        # Add subtle glow effect
+        glow_surface = pygame.Surface((peace_rect.width + 20, peace_rect.height + 20), pygame.SRCALPHA)
+        glow_rect = glow_surface.get_rect(center=(x, y))
+        
+        # Draw multiple layers for glow
+        for i in range(5, 0, -1):
+            alpha = int(30 * (i / 5))
+            glow_color = (100, 180, 150, alpha)
+            glow_text = peace_font.render("Peace", True, glow_color)
+            glow_text_rect = glow_text.get_rect(center=(glow_surface.get_width() // 2, glow_surface.get_height() // 2))
+            glow_surface.blit(glow_text, glow_text_rect)
+        
+        self.screen.blit(glow_surface, glow_rect.topleft)
+        self.screen.blit(peace_surface, peace_rect)
