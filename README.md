@@ -1,212 +1,102 @@
-# Ripple
+<div align="center">
+  <h1>Ripple</h1>
+  <p><b>A Zen-Themed Physics Puzzle Game</b></p>
+</div>
 
-A zen-themed puzzle game where you guide a ball to its target by creating ripples in a tranquil water pool.
+**Ripple** is a meditative physics-based puzzle game that combines strategy with relaxation. Launch stones into a serene water pool to create realistic wave ripples that push a floating ball toward its destination. With calming pastel aesthetics, ambient sounds, and intuitive controls. You can also seamlessly play your favorite song in the background while enjoying this game to complete the zen experience!
 
-## Overview
+<video src="game_demo.mp4" width="100%" controls autoplay loop></video>
 
-Ripple is a meditative physics-based puzzle game that combines strategy with relaxation. Launch stones into a serene water pool to create realistic wave ripples that push a floating ball toward its destination. With calming pastel aesthetics, ambient sounds, and intuitive controls, Ripple offers a unique blend of challenge and tranquility.
+---
 
-## Game Objective
-
-Your goal is simple: guide the ball from the red starting spot to the green target spot using ripples created by launching stones into the water. But there's a catch—you have a limited number of stones, so every throw counts!
-
-## How Ripples Work
-
-When a stone hits the water, it creates a circular ripple that propagates outward. These ripples aren't just visual—they generate real physical forces that push the ball:
-
-- **Wave Propagation**: Ripples expand outward at a constant speed for 5 seconds
-- **Amplitude Decay**: Wave strength decreases exponentially over time, simulating natural dissipation
-- **Force Application**: Ripples push the ball radially away from their center with force proportional to their current amplitude
-- **Wave Interference**: Multiple ripples combine their forces, creating complex interference patterns that can push the ball in unexpected directions
-- **Physics Simulation**: The ball responds with realistic momentum, inertia, and water friction
-
-Understanding wave interference is key to mastering Ripple. Strategic stone placement can create constructive interference (waves combining to push harder) or use multiple ripples to guide the ball along curved paths.
-
-## Level Completion
-
-To complete a level:
-1. The ball must enter the green target spot
-2. You must accomplish this before running out of stones
-
-When you successfully complete a level:
-- Any remaining stones carry over to the next level
-- You'll see statistics showing how many stones you used
-- The next level begins with your remaining stone inventory
-
-## Stone Mechanics
-
-
-**Stone Inventory**:
-- You start with 10 stones at the beginning of the game
-- Each stone launch decrements your counter by one
-- Unused stones carry over between levels
-- The stone counter is displayed at the top of the screen
-
-**Resource Management**:
-- Plan your shots carefully—once you're out of stones, it's game over
-- Experiment with different stone placements to find efficient solutions
-- Sometimes fewer, well-placed stones work better than many random throws
-
-**Game Over Condition**:
-- If your stone counter reaches zero and the ball hasn't reached the target, the level fails
-- You can retry the level or return to the main menu
-
-## Obstacles
-
-As you progress through levels, you'll encounter new challenges:
-
-**Anti-Ripple Zones** (Level 2+):
-- Static rectangular barriers that block wave propagation
-- Ripples cannot pass through these zones
-- Forces the player to find creative stone placement strategies
-- Adds strategic depth by limiting direct paths to the target
-
-## Controls
-
-**Mouse Controls**:
-- **Click and Hold**: Aim the catapult
-- **Mouse Movement**: Adjust angle and power while holding
-- **Release**: Launch the stone
-
-**Visual Feedback**:
-- **Trajectory Preview**: Dotted line shows where your stone will land
-- **Power Meter**: Indicates launch strength based on pull-back distance
-- **Landing Marker**: Circle at the predicted impact point
-
-## Installation
+## 🚀 Installation & Launch
 
 ### System Requirements
-
 - **Operating System**: Windows, macOS, or Linux
 - **Python**: Version 3.7 or higher
 - **RAM**: 512 MB minimum
 - **Display**: 1024x768 resolution or higher
 - **Audio**: Sound card for audio effects and music (optional)
 
-### Installation Steps
-
-1. **Clone or download this repository**:
+### Setup Steps
+1. **Clone the repository**:
    ```bash
    git clone <repository-url>
    cd ripple
    ```
-
-2. **Install Python dependencies**:
+2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-
-   This will install Pygame, the only required dependency.
-
-3. **Verify installation**:
+3. **Launch the game**:
    ```bash
-   python --version
+   python main.py
    ```
-   Ensure Python 3.7+ is installed.
-
-## How to Play
-
-### Launch the Game
-
-Run the following command from the project directory:
-
-```bash
-python main.py
-```
-
-The game window will open at 1024x768 resolution.
-
-### Main Menu
-
-- **Start Game**: Begin from level 1
-- **Settings**: Adjust sound effects and music volume
-- **Exit**: Close the game
-
-### Gameplay
-
-1. The ball starts at the red spot
-2. Aim the catapult by clicking and dragging
-3. Release to launch a stone
-4. Watch the ripples push the ball
-5. Guide the ball to the green target spot
-6. Complete levels efficiently to conserve stones
-
-### Tips
-
-- Experiment with stone placement before committing
-- Use the trajectory preview to aim accurately
-- Multiple ripples can create powerful combined forces
-- Sometimes indirect paths are more efficient than direct ones
-- Watch how fish react to ripples—they show wave propagation in real-time
-
-## Game Features
-
-- **Realistic Wave Physics**: Authentic ripple propagation with interference patterns
-- **Zen Aesthetic**: Calming pastel colors and smooth animations
-- **Ambient Audio**: Gentle sound effects and looping background music
-- **Progressive Difficulty**: Multiple levels with increasing complexity
-- **Resource Management**: Strategic stone usage adds puzzle depth
-- **Responsive Controls**: 60 FPS gameplay with sub-16ms input latency
-- **Living Environment**: Fish swim and react to ripples naturally
-
-## Project Structure
-
-```
-ripple/
-├── main.py                 # Game entry point and main loop
-├── requirements.txt        # Python dependencies
-├── game/                   # Game modules
-│   ├── audio.py           # Audio manager and sound effects
-│   ├── catapult.py        # Catapult mechanics and trajectory
-│   ├── config.py          # Configuration constants
-│   ├── fish.py            # Fish entities and animations
-│   ├── level.py           # Level management and progression
-│   ├── particles.py       # Particle effects system
-│   ├── physics.py         # Wave simulation and ball physics
-│   ├── renderer.py        # Rendering system
-│   └── transitions.py     # Screen transitions and effects
-├── assets/                 # Audio files
-│   ├── launch.wav
-│   ├── splash.wav
-│   ├── ripple.wav
-│   ├── ball_move.wav
-│   ├── level_complete.wav
-│   ├── click.wav
-│   └── background.ogg
-└── levels/                 # Level data
-    └── level_data.json    # Level definitions
-
-```
-
-## Troubleshooting
-
-**Game won't start**:
-- Verify Python 3.7+ is installed: `python --version`
-- Ensure Pygame is installed: `pip install pygame`
-- Check that you're in the correct directory
-
-**No sound**:
-- Check system volume settings
-- Verify audio files exist in the `assets/` directory
-- Adjust volume in the game's Settings menu
-
-**Low frame rate**:
-- Close other applications to free up resources
-- The game automatically reduces quality if FPS drops below 50
-
-**Ball gets stuck**:
-- This is rare but can happen with certain ripple patterns
-- If the ball doesn't move for several seconds, consider it a learning opportunity for better stone placement
-- Restart the level if needed
-
-## Credits
-
-Ripple was created as a demonstration of physics-based puzzle game design with an emphasis on calming, meditative gameplay.
-
-## License
-
-This project is provided as-is for educational and entertainment purposes.
 
 ---
 
-Enjoy the tranquility of Ripple! 🌊
+## 📖 How to Play
+
+### Objective
+Your goal is simple: guide the ball from the red starting spot to the green target spot using ripples created by launching stones into the water. But there's a catch—you have a limited number of stones, so every throw counts!
+
+### Controls & Mechanics
+1. **Aim:** Click and hold the mouse backward to aim your catapult. A dotted trajectory preview shows where your stone will land based on pull-back distance.
+2. **Launch:** Release the mouse button to launch the stone. Once it hits the water, a ripple will expand outward.
+3. **Push the Ball:** Ripples apply a radial pushing force against the ball. Experiment with different placements to take advantage of wave interference.
+4. **Manage Resources:** Your remaining stones carry over when you beat a level. Running out of stones before the ball reaches the target results in game over!
+
+---
+
+## 🌟 Upcoming Features
+
+- **Level Builder:** Design, customize, and share your own serene puzzle setups.
+- **Fish Creator:** Customize and populate the aquatic life in your digital water pool.
+
+---
+
+## 🤝 Support the Developer
+
+**Ripple** is completely free, open-source, and has no hidden fees. If this game gave you a moment of relaxation or helped you chill, please consider supporting its ongoing development!
+
+---
+
+## 🛠️ Contributing
+
+Contributions to Ripple are welcome. Please ensure that any proposed changes adhere to the project's meditative atmosphere and our objective of maintaining an optimized, physics-based environment.
+
+### 1. Local Development Setup
+To build and run the game from source:
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ripple.git
+cd ripple
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# On Windows:
+.\.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# Run the game locally
+python main.py
+```
+
+### 2. Building the Executable
+We can use PyInstaller to package the game. Once you have made your changes:
+```bash
+pip install pyinstaller
+pyinstaller --onefile --windowed --add-data "assets;assets" --add-data "levels;levels" main.py
+```
+*(Note: Ensure that assets and level data files are properly linked!)*
+
+### 3. Guidelines
+- **Code Style:** Follow PEP-8 standards. Keep core systems like `physics.py` and `renderer.py` clean, modular, and performant.
+- **Game Aesthetics:** We prioritize a minimalistic, relaxing experience. Do not add stressful visual noise or discordant sounds.
+- **Pull Requests:** Open an issue first to discuss major architectural changes, bug fixes, or entirely new levels before submitting a PR.
