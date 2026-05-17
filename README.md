@@ -3,9 +3,9 @@
   <p><b>A Zen-Themed Physics Puzzle Game</b></p>
 </div>
 
-**Ripple** is a meditative physics-based puzzle game that combines strategy with relaxation. Launch stones into a serene water pool to create realistic wave ripples that push a floating ball toward its destination. With calming pastel aesthetics, ambient sounds, and intuitive controls. You can also seamlessly play your favorite song in the background while enjoying this game to complete the zen experience!
+**Ripple** is a meditative physics-based puzzle game that combines strategy with relaxation. Launch stones into a serene water pool to create realistic wave ripples that push a floating ball toward its destination. With calming pastel aesthetics, ambient sounds, and intuitive controls. You can also play your favorite song in the background while enjoying this game to complete the zen experience!
 
-<video src="game_demo.mp4" width="100%" controls autoplay loop></video>
+[![Watch the video](Ripple%20Thumbnail.png)](https://youtu.be/ZHMrycf691c)
 
 ---
 
